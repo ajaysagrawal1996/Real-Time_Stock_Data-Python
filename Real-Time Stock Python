@@ -1,0 +1,105 @@
+import time
+
+import requests
+import datetime
+
+Ticker = str(input("Enter the Ticker :"))
+Region = str(input("Enter the Region :"))
+
+url = "https://apidojo-yahoo-finance-v1.p.rapidapi.com/stock/v2/get-profile"
+
+querystring = {"symbol": (Ticker), "region": Region}
+
+headers = {
+    'x-rapidapi-key': "590d47a809msh87df06511498c02p14a09cjsnc27e084852d5",
+    'x-rapidapi-host': "apidojo-yahoo-finance-v1.p.rapidapi.com"
+}
+response = requests.request("GET", url, headers=headers, params=querystring)
+
+Findname = response.text.find('"shortName":"')
+Strname = Findname + 13
+Strname1 = response.text.find('","averageDaily')
+Textname = response.text[Strname:Strname1]
+Company = Textname.strip('",1234567890')
+
+FindOpen = response.text.find('"open":{"raw":')
+StrOpen = FindOpen + 14
+StrOpen1 = StrOpen + 7
+TextOpen = response.text[StrOpen:StrOpen1]
+Open = TextOpen.strip('abcdefghijklmnopqrstuvwxyz, ",:')
+
+FindClose = response.text.find('"regularMarketPreviousClose":{"raw":')
+StrClose = FindClose + 36
+StrClose1 = StrClose + 7
+TextClose = response.text[StrClose:StrClose1]
+Previous_Close = TextClose.strip('abcdefghijklmnopqrstuvwxyz, ",:')
+
+FindCap = response.text.find('"marketCap":{"raw":')
+StrCap = FindCap + 34
+StrCap1 = StrCap + 15
+TextCap = response.text[StrCap:StrCap1]
+Market_Cap = TextCap.strip('abcdefghijklmnopqrstuvwxyz, ",:')
+
+print("Name:", Company)
+print("Open:", Open)
+print("Previous Close:", Previous_Close)
+print("Market Cap:", Market_Cap)
+
+
+i = 0
+for i in range(1, 10000):
+    response = requests.request("GET", url, headers=headers, params=querystring)
+
+    Findprice = response.text.rfind('"regularMarketPrice":{"raw":')
+    Strprice = Findprice + 28
+    Strprice1 = Strprice + 7
+    Text = response.text[Strprice:Strprice1]
+    lastPrice = Text.strip('abcdefghijklmnopqrstuvwxyz, ",:')
+    time_stamp = datetime.datetime.now()
+    time_stamp = time_stamp.strftime("%c")
+
+    FindVolume = response.text.find('"regularMarketVolume":{"raw":')
+    StrVolume = FindVolume + 39
+    StrVolume1 = StrVolume + 15
+    TextVolume = response.text[StrVolume:StrVolume1]
+    Volume = TextVolume.strip('abcdefghijklmnopqrstuvwxyz, ",:')
+
+    Findhigh = response.text.find('"regularMarketDayHigh":{"raw":')
+    Strhigh = Findhigh + 30
+    Strhigh1 = Strhigh + 7
+    Texthigh = response.text[Strhigh:Strhigh1]
+    High = Texthigh.strip('abcdefghijklmnopqrstuvwxyz, ",:')
+
+    Findlow = response.text.find('"dayLow":{"raw":')
+    Strlow = Findlow + 16
+    Strlow1 = Strlow + 7
+    Textlow = response.text[Strlow:Strlow1]
+    Low = Textlow.strip('abcdefghijklmnopqrstuvwxyz, ",:')
+
+
+    print("Volume :", Volume)
+    print("Day High :", High)
+    print("Day Low:", Low)
+
+    if Region == 'US' or Region == "us":
+        print("Date : ", time_stamp[4:10], ",", "Time :", time_stamp[10:20])
+        print("Last Trading Price : USD", lastPrice)
+
+    if Region == 'IN' or Region == "in":
+        print("Date : ", time_stamp[4:10], ",", "Time :", time_stamp[10:20])
+        print("Last Trading Price : INR", lastPrice)
+
+    if Region == 'TO' or Region == "to":
+        print("Date : ", time_stamp[4:10], ",", "Time :", time_stamp[10:20])
+        print("Last Trading Price : CAD", lastPrice)
+
+    if Region == '':
+        print("Date : ", time_stamp[4:10], ",", "Time :", time_stamp[10:20])
+        print("Last Trading Price :", lastPrice)
+
+    print("Refreshes every 10 Seconds")
+    i = i + 1
+    time.sleep(7)
+
+if lastPrice == "":
+    print("Please check the Ticker")
